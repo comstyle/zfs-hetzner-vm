@@ -624,7 +624,7 @@ if [[ $v_swap_size -gt 0 ]]; then
 fi
 
 echo "======= setting up initial system packages =========="
-debootstrap --arch=aarch64 bookworm "$c_zfs_mount_dir" "$c_deb_packages_repo"
+debootstrap --arch=arm64 bookworm "$c_zfs_mount_dir" "$c_deb_packages_repo"
 
 zfs set devices=off "$v_rpool_name"
 
@@ -726,7 +726,7 @@ chroot_execute "dpkg-reconfigure tzdata -f noninteractive"
 
 echo "======= installing latest kernel============="
 # linux-headers-generic linux-image-generic
-chroot_execute "apt install --yes linux-image${v_kernel_variant}-aarch64 linux-headers${v_kernel_variant}-aarch64 dpkg-dev"
+chroot_execute "apt install --yes linux-image${v_kernel_variant}-arm64 linux-headers${v_kernel_variant}-arm64 dpkg-dev"
 
 echo "======= installing aux packages =========="
 chroot_execute "apt install --yes man wget curl software-properties-common nano htop gnupg"
