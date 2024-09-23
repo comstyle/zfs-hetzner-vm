@@ -539,9 +539,9 @@ echo "======= partitioning the disk =========="
   for selected_disk in "${v_selected_disks[@]}"; do
     wipefs --all --force "$selected_disk"
     sgdisk -a1 -n1:24K:+1000K            -t1:EF02 "$selected_disk"
-	sgdisk -n2:1M:+512M                  -t2:EF00 "$selected_disk"
-    sgdisk -n3:0:+2G                     -t2:BF01 "$selected_disk" # Boot pool
-    sgdisk -n4:0:"$tail_space_parameter" -t3:BF01 "$selected_disk" # Root pool
+    sgdisk -n2:1M:+512M                  -t2:EF00 "$selected_disk"
+    sgdisk -n3:0:+2G                     -t3:BF01 "$selected_disk" # Boot pool
+    sgdisk -n4:0:"$tail_space_parameter" -t4:BF01 "$selected_disk" # Root pool
   done
 
   udevadm settle
