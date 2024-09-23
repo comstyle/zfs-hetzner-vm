@@ -776,11 +776,12 @@ chroot_execute "DEBIAN_FRONTEND=noninteractive apt install --yes grub-efi-arm64"
 chroot_execute "DEBIAN_FRONTEND=noninteractive apt install --yes dosfstools"
 chroot_execute "mkdir /boot/efi"
 for disk in ${v_selected_disks[@]}; do
-  echo /dev/disk/by-uuid/$(blkid -s UUID -o value ${DISK}-part2) /boot/efi vfat defaults 0 0 >> /etc/fstab
+  echo /dev/disk/by-uuid/$(blkid -s UUID -o value ${disk}-part2) /boot/efi vfat defaults 0 0 >> /etc/fstab
+  chroot_execute "mount /boot/efi"
   chroot_execute "grub-install --recheck $disk"
 done
 
-chroot_execute "mount /boot/efi"
+
 chroot_execute "sed -i 's/#GRUB_TERMINAL=console/GRUB_TERMINAL=console/g' /etc/default/grub"
 chroot_execute "sed -i 's|GRUB_CMDLINE_LINUX_DEFAULT=.*|GRUB_CMDLINE_LINUX_DEFAULT=\"net.ifnames=0\"|' /etc/default/grub"
 chroot_execute "sed -i 's|GRUB_CMDLINE_LINUX=\"\"|GRUB_CMDLINE_LINUX=\"root=ZFS=$v_rpool_name/ROOT/debian\"|g' /etc/default/grub"
