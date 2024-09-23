@@ -539,8 +539,9 @@ echo "======= partitioning the disk =========="
   for selected_disk in "${v_selected_disks[@]}"; do
     wipefs --all --force "$selected_disk"
     sgdisk -a1 -n1:24K:+1000K            -t1:EF02 "$selected_disk"
-    sgdisk -n2:0:+2G                   -t2:BF01 "$selected_disk" # Boot pool
-    sgdisk -n3:0:"$tail_space_parameter" -t3:BF01 "$selected_disk" # Root pool
+	sgdisk -n2:1M:+512M                  -t2:EF00 "$selected_disk"
+    sgdisk -n3:0:+2G                     -t2:BF01 "$selected_disk" # Boot pool
+    sgdisk -n4:0:"$tail_space_parameter" -t3:BF01 "$selected_disk" # Root pool
   done
 
   udevadm settle
@@ -556,8 +557,8 @@ echo "======= create zfs pools and datasets =========="
   fi
 
   for selected_disk in "${v_selected_disks[@]}"; do
-    rpool_disks_partitions+=("${selected_disk}-part3")
-    bpool_disks_partitions+=("${selected_disk}-part2")
+    rpool_disks_partitions+=("${selected_disk}-part4")
+    bpool_disks_partitions+=("${selected_disk}-part3")
   done
 
   pools_mirror_option=
@@ -770,12 +771,16 @@ chroot_execute "echo options zfs zfs_arc_max=$((v_zfs_arc_max_mb * 1024 * 1024))
 
 echo "======= setting up grub =========="
 chroot_execute "echo 'grub-pc grub-pc/install_devices_empty   boolean true' | debconf-set-selections"
-chroot_execute "DEBIAN_FRONTEND=noninteractive apt install --yes grub-legacy"
-chroot_execute "DEBIAN_FRONTEND=noninteractive apt install --yes grub-pc"
+chroot_execute "DEBIAN_FRONTEND=noninteractive apt install --yes grub-common"
+chroot_execute "DEBIAN_FRONTEND=noninteractive apt install --yes grub-efi-arm64"
+chroot_execute "DEBIAN_FRONTEND=noninteractive apt install --yes dosfstools"
+chroot_execute "mkdir /boot/efi"
 for disk in ${v_selected_disks[@]}; do
+  echo /dev/disk/by-uuid/$(blkid -s UUID -o value ${DISK}-part2) /boot/efi vfat defaults 0 0 >> /etc/fstab
   chroot_execute "grub-install --recheck $disk"
 done
 
+chroot_execute "mount /boot/efi"
 chroot_execute "sed -i 's/#GRUB_TERMINAL=console/GRUB_TERMINAL=console/g' /etc/default/grub"
 chroot_execute "sed -i 's|GRUB_CMDLINE_LINUX_DEFAULT=.*|GRUB_CMDLINE_LINUX_DEFAULT=\"net.ifnames=0\"|' /etc/default/grub"
 chroot_execute "sed -i 's|GRUB_CMDLINE_LINUX=\"\"|GRUB_CMDLINE_LINUX=\"root=ZFS=$v_rpool_name/ROOT/debian\"|g' /etc/default/grub"
