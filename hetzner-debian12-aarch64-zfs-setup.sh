@@ -776,7 +776,8 @@ chroot_execute "DEBIAN_FRONTEND=noninteractive apt install --yes grub-efi-arm64"
 chroot_execute "DEBIAN_FRONTEND=noninteractive apt install --yes dosfstools"
 chroot_execute "mkdir /boot/efi"
 for disk in ${v_selected_disks[@]}; do
-  echo /dev/disk/by-uuid/$(blkid -s UUID -o value ${disk}-part2) /boot/efi vfat defaults 0 0 >> /etc/fstab
+  mkdosfs -F 32 -s 1 -n EFI ${disk}-part2
+  chroot_execute "echo /dev/disk/by-uuid/$(blkid -s UUID -o value ${disk}-part2) /boot/efi vfat defaults 0 0 >> /etc/fstab"
   chroot_execute "mount /boot/efi"
   chroot_execute "grub-install --recheck $disk"
 done
