@@ -509,23 +509,23 @@ done
 
 echo "======= installing zfs on rescue system =========="
 
-  echo "zfs-dkms zfs-dkms/note-incompatible-licenses note true" | debconf-set-selections  
-#  echo "y" | zfs
+#  echo "zfs-dkms zfs-dkms/note-incompatible-licenses note true" | debconf-set-selections  
+  echo "y" | zfs
 # linux-headers-generic linux-image-generic
-  apt install --yes software-properties-common dpkg-dev dkms
+#  apt install --yes software-properties-common dpkg-dev dkms
   #rm -f "$(which zfs)"
   #rm -f "$(which zpool)"
-  echo -e "deb http://$debian_repo_server/debian/ bookworm main contrib non-free-firmware" >/etc/apt/sources.list
+#  echo -e "deb http://$debian_repo_server/debian/ bookworm main contrib non-free-firmware" >/etc/apt/sources.list
   #echo -e "Package: src:zfs-linux\nPin: release n=bookworm\nPin-Priority: 990\n" > /etc/apt/preferences.d/90_zfs
   apt update  
 
   which gsettings && set org.gnome.desktop.media-handling automount false || :
 
-  apt install --yes debootstrap gdisk zfsutils-linux
+  apt install --yes debootstrap gdisk
   #rm /etc/apt/sources.list.d/bookworm-bookworm.list
   #rm /etc/apt/preferences.d/90_zfs
   apt update
-  export PATH=$PATH:/usr/sbin
+  #export PATH=$PATH:/usr/sbin
   zfs --version
 
 echo "======= partitioning the disk =========="
